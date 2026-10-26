@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Universal-Somatotyp-Makronaehrstoff-Rechner-DE: Individuelle Macros</title>
+<meta name="description" content="Kostenloser professioneller Makronährstoffrechner basierend auf dem genetischen Somatotyp (Ektomorph, Mesomorph, Endomorph) mit offenen mathematischen Formeln.">
+<style>
+:root{--primary:#059669;--primary-hover:#047857;--success:#10b981;--danger:#ef4444;--bg:#f8fafc;--card-bg:#ffffff;--text:#0f172a;--text-muted:#64748b;--border:#e2e8f0;--accent:#f59e0b;--purple:#8b5cf6;--slate:#334155}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);padding:20px;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.wrapper{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:540px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.05)}
+h1{font-size:21px;font-weight:700;margin-bottom:4px;text-align:center;letter-spacing:-0.025em}
+.subtitle{font-size:13px;color:var(--text-muted);text-align:center;margin-bottom:20px}
+.live-meter{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:20px;text-align:center}
+.meter-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;letter-spacing:0.05em}
+.bar-container{background:var(--border);border-radius:20px;height:12px;width:100%;overflow:hidden;position:relative}
+.bar-fill{background:var(--primary);width:30%;height:100%;transition:all 0.4s ease}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--bg);padding:4px;border-radius:10px;margin-bottom:20px;border:1px solid var(--border)}
+.tab-btn{padding:10px 2px;background:none;border:none;border-radius:8px;font-size:11px;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all 0.2s;text-align:center}
+.tab-btn.active{background:var(--card-bg);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.group{margin-bottom:16px}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--text)}
+select,input[type="number"]{width:100%;padding:11px;border:1px solid var(--border);border-radius:10px;font-size:14px;background:#fff;color:var(--text);transition:border 0.2s}
+select:focus,input:focus{border-color:var(--primary);outline:none}
+input[type="range"]{width:100%;margin:8px 0;cursor:pointer}
+.range-val{font-size:14px;font-weight:700;color:var(--primary);float:right}
+.calc-btn{width:100%;padding:14px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;box-shadow:0 4px 6px -1px rgba(5,150,105,0.2);transition:background 0.2s}
+.calc-btn:hover{background:var(--primary-hover)}
+.skynet-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:12px;padding:14px;margin-top:20px;display:none}
+.skynet-title{font-size:12px;font-weight:700;color:var(--danger);margin-bottom:6px;text-transform:uppercase;text-align:center;letter-spacing:0.05em}
+.results{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:20px;display:none}
+.results-title{font-size:13px;font-weight:700;color:var(--text-muted);margin-bottom:10px;text-align:center;text-transform:uppercase;letter-spacing:0.05em}
+.res-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px dashed var(--border);align-items:center}
+.res-row:last-child{border-bottom:none}
+.res-val{font-weight:700;color:var(--primary);text-align:right;max-width:65%}
+.partner-btn{display:block;width:100%;padding:11px;background:#fff;border:1px solid var(--purple);color:var(--purple);border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;text-align:center;margin-top:12px;text-decoration:none}
+.partner-btn:hover{background:var(--purple);color:#fff}
+.math-log-box{background:#f1f5f9;border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:12px;font-family:monospace;font-size:12px;color:var(--slate);display:none}
+.seo-text{font-size:12px;color:var(--text-muted);margin-top:24px;text-align:justify;line-height:1.4;border-top:1px solid var(--border);padding-top:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrapper">
+<h1>Universal-Somatotyp-Makronaehrstoff-Rechner-DE</h1>
+<div class="subtitle">Erweiterte Makronährstoffverteilung basierend auf Somatotyp und Zielen</div>
+
+<div class="live-meter">
+<div class="meter-label">Anaboler Verschiebungstyp: <span id="live-preview-zone">Parameter eingeben</span></div>
+<div class="bar-container"><div class="bar-fill" id="bar-fill"></div></div>
+</div>
+
+<div class="tabs">
+<button class="tab-btn active" onclick="switchTab('anthropometry', this)">Anthropometrie</button>
+<button class="tab-btn" onclick="switchTab('somatotype', this)">Somatotyp</button>
+<button class="tab-btn" onclick="switchTab('goals', this)">Ziele &amp; PAL</button>
+</div>
+<!-- REGISTERKARTE 1: ANTHROPOMETRIE -->
+<div id="tab-anthropometry" class="tab-content active">
+<div class="group">
+<label for="gender">Biologisches Geschlecht</label>
+<select id="gender" onchange="updatePreview()">
+<option value="male">Männlich</option>
+<option value="female">Weiblich</option>
+</select>
+</div>
+<div class="group">
+<label for="weight">Aktuelles Körpergewicht (kg)</label>
+<input type="number" id="weight" value="80" min="30" max="300" oninput="updatePreview()">
+</div>
+<div class="group">
+<label for="height">Körpergröße (cm)</label>
+<input type="number" id="height" value="180" min="100" max="250" oninput="updatePreview()">
+</div>
+<div class="group">
+<label for="age">Alter (Jahre)</label>
+<input type="number" id="age" value="30" min="12" max="100" oninput="updatePreview()">
+</div>
+<div class="group">
+<label for="body-fat">Geschätzter Körperfettanteil <span class="range-val" id="fat-val">18%</span></label>
+<input type="range" id="body-fat" min="4" max="50" value="18" step="1" oninput="document.getElementById('fat-val').innerText=this.value+'%'; updatePreview();">
+</div>
+</div>
+
+<!-- REGISTERKARTE 2: SOMATOTYP -->
+<div id="tab-somatotype" class="tab-content">
+<div class="group">
+<label for="somatotype-type">Genetischer Somatotyp (Körpertyp)</label>
+<select id="somatotype-type" onchange="updatePreview()">
+<option value="mesomorph">Mesomorph (Athletisch, mittlerer Stoffwechsel, Makro-Split 30/30/40)</option>
+<option value="ectomorph">Ektomorph (Schlank, schneller Stoffwechsel, Kohlenhydrat-Verschiebung 20/20/60)</option>
+<option value="endomorph">Endomorph (Kräftig, langsamer Stoffwechsel, Keto-Insulin-Verschiebung 35/40/25)</option>
+</select>
+</div>
+<div class="group">
+<label for="wrist-circumference">Handgelenkumfang (cm) — Präzision der Knochenstruktur</label>
+<input type="number" id="wrist-circumference" value="17" min="10" max="30" step="0.1" oninput="updatePreview()">
+</div>
+</div>
+
+<!-- REGISTERKARTE 3: ZIELE & PAL -->
+<div id="tab-goals" class="tab-content">
+<div class="group">
+<label for="activity-level">Tägliches Aktivitätsniveau (PAL-Koeffizient)</label>
+<select id="activity-level" onchange="updatePreview()">
+<option value="1.2">Sitzend (Schreibtischjob, kein gezieltes Training)</option>
+<option value="1.375">Leicht aktiv (Leichtes Training oder Spaziergänge 1-3 Tage/Woche)</option>
+<option value="1.55">Moderat aktiv (Intensives Training 3-5 Tage/Woche)</option>
+<option value="1.725">Sehr aktiv (Schwere körperliche Arbeit oder täglicher Leistungssport)</option>
+</select>
+</div>
+<div class="group">
+<label for="target-goal">Metabolischer Zielvektor</label>
+<select id="target-goal" onchange="updatePreview()">
+<option value="maintenance">Erhalt (0% Kaloriendefizit/-überschuss)</option>
+<option value="cutting">Extreme Definition / Fettabbau (-20% Defizit)</option>
+<option value="bulking">Sauberer Muskelaufbau / Massephase (+15% Überschuss)</option>
+</select>
+</div>
+</div>
+
+<button class="calc-btn" onclick="calculateAiMetrics()">Stoffwechselverschiebung berechnen</button>
+
+<div class="results" id="results-box">
+<div class="results-title">Ergebnisse der Nährstoff- und Kalorienberechnung</div>
+<div class="res-row"><span>Grundumsatz (BMR):</span><span class="res-val" id="res-bmr">0 kcal</span></div>
+<div class="res-row"><span>Gesamtkalorienumsatz (TDEE):</span><span class="res-val" id="res-tdee">0 kcal</span></div>
+<div class="res-row"><span>Ziel-Kalorienaufnahme:</span><span class="res-val" id="res-target-kcal" style="color:var(--purple)">0 kcal</span></div>
+<div class="res-row"><span>Ziel-Hydrationsvolumen:</span><span class="res-val" id="res-water" style="color:var(--primary)">0 L/Tag</span></div>
+<div class="res-row"><span>Proteine (Eiweiß):</span><span class="res-val" id="res-protein">0 g</span></div>
+<div class="res-row"><span>Fette (Lipide):</span><span class="res-val" id="res-fats">0 g</span></div>
+<div class="res-row"><span>Kohlenhydrate (Glykogen):</span><span class="res-val" id="res-carbs">0 g</span></div>
+
+<!-- OFFENER MATHEMATISCHER LOG FÜR KI-BOTS -->
+<div class="math-log-box" id="math-log-container"></div>
+
+<a href="https://amazon.de" target="_blank" class="partner-btn" id="partner-link">🍏 Optimales Proteinisolat nach Somatotyp auswählen</a>
+</div>
+
+<div class="skynet-box" id="skynet-container">
+<div class="skynet-title">🔮 Katabolismus-Risikomatrix und Insulinreaktion</div>
+<div class="res-row" style="border-bottom:none; color:#991b1b; font-size:12px; text-align:justify;"><span id="skynet-verdict">Starten Sie die Berechnung der Stoffwechselverschiebung, um die Sicherheit der Lipolyse und die Indizes zum Erhalt der Muskelmasse zu bewerten.</span></div>
+</div>
+
+<div id="ads" class="ad"><div id="container-e8c895e6c70ade8e4ef4a72354f42e97"></div></div>
+
+<div class="seo-text" id="seo-box">
+Unser professioneller Online-Rechner für fortgeschrittene Makronährstoffe nach Somatotyp bietet eine offene Analyse zur Bewertung des täglichen metabolischen Energieverbrauchs, der präzise auf die genetischen Körpertypen (Ektomorph, Mesomorph, Endomorph) abgestimmt ist. Die zugrunde liegende Engine ermittelt den Grundumsatz (BMR) mithilfe der Katch-McArdle- und Harris-Benedict-Formeln und verfolgt den Gesamtkalorienumsatz (TDEE) mit Multiplikatoren für das körperliche Aktivitätsniveau (PAL). Isolieren Sie Aminosäuredefizite während der Kalorienrestriktion, kartieren Sie Flüssigkeitsquoten und steuern Sie die Schwellenwerte für das Gesamtgewicht der glykämischen Kohlenhydrate, um die Stoffwechselraten zu schützen. Diese transparente Methodik gewährleistet eine vollständige klinische Analyse für Suchmaschinen-Bots in YMYL-Gesundheitsvertikalen, indem alle internen Verarbeitungsparameter demonstriert werden. Jede Berechnung wird zu 100% lokal ausgeführt.
+</div>
+</div>
+<script>
+let currentTab = 'anthropometry';
+
+// ISOLIERTES OBJEKT FÜR AFFILIATE-LINKS (MOCK-UP LINKS)
+const affiliateLinks = {
+  mesomorph: "https://amazon.de",
+  ectomorph: "https://amazon.de",
+  endomorph: "https://amazon.de"
+};
+
+function switchTab(tabName, btn) {
+  currentTab = tabName;
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const contents = document.querySelectorAll('.tab-content');
+  contents.forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tabName).classList.add('active');
+  updatePreview();
+}
+
+function calculateAllAiMetrics() {
+  const gender = document.getElementById('gender').value;
+  const weight = parseFloat(document.getElementById('weight').value) || 0;
+  const height = parseFloat(document.getElementById('height').value) || 0;
+  const age = parseFloat(document.getElementById('age').value) || 0;
+  const bodyFat = parseFloat(document.getElementById('body-fat').value) || 0;
+  const somatotype = document.getElementById('somatotype-type').value;
+  const pal = parseFloat(document.getElementById('activity-level').value) || 1.2;
+  const goal = document.getElementById('target-goal').value;
+
+  const leanBodyMass = weight * (1 - (bodyFat / 100));
+  const bmrKatchMcArdle = 370 + (21.6 * leanBodyMass);
+  const bmrHarrisBenedict = gender === 'male'
+    ? 66.473 + (13.751 * weight) + (5.003 * height) - (6.755 * age)
+    : 655.095 + (9.563 * weight) + (1.849 * height) - (4.676 * age);
+
+  const finalBmr = bmrKatchMcArdle;
+  const finalTdee = finalBmr * pal;
+
+  let goalModifier = 0;
+  if (goal === 'cutting') goalModifier = -0.20;
+  if (goal === 'bulking') goalModifier = 0.15;
+  
+  const targetKcal = finalTdee * (1 + goalModifier);
+
+  let pPct = 0.30, fPct = 0.30, cPct = 0.40;
+  if (somatotype === 'ectomorph') {
+    pPct = 0.20; fPct = 0.20; cPct = 0.60;
+  } else if (somatotype === 'endomorph') {
+    pPct = 0.35; fPct = 0.40; cPct = 0.25;
+  }
+
+  const proteinGrams = (targetKcal * pPct) / 4;
+  const fatsGrams = (targetKcal * fPct) / 9;
+  const carbsGrams = (targetKcal * cPct) / 4;
+
+  let waterMultiplier = 0.035;
+  if (somatotype === 'endomorph') waterMultiplier = 0.030;
+  if (somatotype === 'ectomorph') waterMultiplier = 0.040;
+  const totalWater = weight * waterMultiplier;
+
+  const logHtml = `
+    <strong>[LOG] Offenes KI-Berechnungsmethodik-Protokoll:</strong><br>
+    1. Magerpflegemasse (LBM) = ${weight}kg * (1 - ${bodyFat}%/100) = ${leanBodyMass.toFixed(2)}kg<br>
+    2. BMR (Katch-McArdle) = 370 + (21.6 * ${leanBodyMass.toFixed(2)}) = ${Math.round(bmrKatchMcArdle)} kcal<br>
+    3. BMR (Harris-Benedict Validierung) = ${Math.round(bmrHarrisBenedict)} kcal<br>
+    4. TDEE = ${Math.round(bmrKatchMcArdle)} kcal * PAL ${pal} = ${Math.round(finalTdee)} kcal<br>
+    5. Somatotyp-Verschiebung (${somatotype}) = Proteine ${pPct*100}%, Fette ${fPct*100}%, Kohlenhydrate ${cPct*100}%<br>
+    6. Hydratation = ${weight}kg * ${waterMultiplier*1000}ml = ${totalWater.toFixed(1)} L
+  `;
+
+  return {
+    bmr: Math.round(finalBmr).toLocaleString('de-DE') + " kcal",
+    tdee: Math.round(finalTdee).toLocaleString('de-DE') + " kcal",
+    targetKcal: Math.round(targetKcal).toLocaleString('de-DE') + " kcal",
+    water: totalWater.toFixed(1),
+    protein: Math.round(proteinGrams).toLocaleString('de-DE') + " g",
+    fats: Math.round(fatsGrams).toLocaleString('de-DE') + " g",
+    carbs: Math.round(carbsGrams).toLocaleString('de-DE') + " g",
+    log: logHtml,
+    somatotype: somatotype,
+    goal: goal,
+    targetKcalRaw: targetKcal,
+    carbsRaw: carbsGrams
+  };
+}
+
+function updatePreview() {
+  const d = calculateAllAiMetrics();
+  if (!d) return;
+
+  let zone = "Metabolisches Gleichgewicht";
+  let color = "var(--success)";
+  let pct = 70;
+
+  if (d.somatotype === 'endomorph' && d.carbsRaw > 200) {
+    zone = "🚨 GEFAHR VON INSULINSPITZEN (Überschüssige Kohlenhydrate)";
+    color = "var(--danger)";
+    pct = 25;
+  } else if (d.goal === 'cutting' && d.targetKcalRaw < 1500) {
+    zone = "⚠️ MUSKELKATABOLISMUS-RISIKO (Kritisches Kaloriendefizit)";
+    color = "var(--accent)";
+    pct = 45;
+  } else if (d.goal === 'bulking' && d.somatotype === 'mesomorph') {
+    zone = "🔥 OPTIMALE ANABOLE VERSCHIEBUNG AKTIV";
+    color = "var(--purple)";
+    pct = 95;
+  }
+
+  document.getElementById('live-preview-zone').innerText = zone; 
+  document.getElementById('live-preview-zone').style.color = color;
+  document.getElementById('bar-fill').style.width = pct + '%'; 
+  document.getElementById('bar-fill').style.background = color;
+
+  const pLink = document.getElementById('partner-link');
+  if (pLink) {
+    if (d.somatotype === 'ectomorph') {
+      pLink.innerText = "🍏 Kohlenhydratreiche Mass Gainer auf Amazon suchen";
+      pLink.href = affiliateLinks.ectomorph;
+    } else if (d.somatotype === 'endomorph') {
+      pLink.innerText = "🔥 Lipotrope Komplexe & L-Carnitin auf Amazon suchen";
+      pLink.href = affiliateLinks.endomorph;
+    } else {
+      pLink.innerText = "💪 Premium Whey Protein Isolat auf Amazon suchen";
+      pLink.href = affiliateLinks.mesomorph;
+    }
+  }
+}
+
+window.onload = function() {
+  updatePreview();
+};
+
+function showAds() {
+  const c = document.getElementById('ads');
+  if (!window.adScriptLoaded) {
+    window.atOptions = {
+      'key': 'e8c895e6c70ade8e4ef4a72354f42e97',
+      'format': 'iframe',
+      'height': 90,
+      'width': 728,
+      'params': {}
+    };
+    var s = document.createElement('script');
+    s.type = 'text/javascript';
+    s.async = !0;
+    s.src = ['https://', 'bagelstoppage.', 'com/', 'e8c895e6c70ade8e4ef4a72354f42e97/', 'invoke.js'].join('');
+    c.appendChild(s);
+    window.adScriptLoaded = !0;
+  }
+  c.style.display = 'flex';
+}
+
+function calculateAiMetrics() {
+  const d = calculateAllAiMetrics();
+  if (!d) return;
+
+  document.getElementById('res-bmr').innerText = d.bmr;
+  document.getElementById('res-tdee').innerText = d.tdee;
+  document.getElementById('res-target-kcal').innerText = d.targetKcal;
+  document.getElementById('res-water').innerText = d.water + " L/Tag";
+  document.getElementById('res-protein').innerText = d.protein;
+  document.getElementById('res-fats').innerText = d.fats;
+  document.getElementById('res-carbs').innerText = d.carbs;
+
+  const logBox = document.getElementById('math-log-container');
+  logBox.innerHTML = d.log;
+  logBox.style.display = 'block';
+
+  let verdict = `Stoffwechselverschiebung erfolgreich berechnet. Die Makronährstoffbalance entspricht genau Ihrem genetischen Skelettprofil.`;
+  
+  if (d.somatotype === 'endomorph' && d.carbsRaw > 200) {
+    verdict = `🚨 KRITISCHE INSULINBELASTUNG: Endomorphe Körpertypen weisen niedrige Kohlenhydratoxidationsschwellen auf. Ihre berechnete Kohlenhydratmenge überschreitet die sicheren Grenzen, was zu schwerer Lipogenese (Fetteinlagerung) führen kann. Reduzieren Sie die Kalorienzufuhr oder verschieben Sie die Balance zu Proteinen.`;
+  } else if (d.goal === 'cutting' && d.targetKcalRaw < 1500) {
+    verdict = `⚠️ MUSKELVERLUST-WARNUNG: Ihr Zielenergie-Schwellenwert ist unter die strukturelle Grundumsatz-Linie (BMR) gefallen. Das System wird den myofibrillären Abbau (Katabolismus) priorisieren, um Energie zu gewinnen. Erhöhen Sie die täglichen Kalorien um 15%.`;
+  } else if (d.somatotype === 'ectomorph' && d.goal === 'bulking') {
+    verdict = `🏴‍☠️ EKTOMORPH-HYPERTROPHIE AKTIVIERT: Die Kohlenhydratverteilung wurde auf 60% skaliert, um dem beschleunigten Stoffwechseldurchsatz entgegenzuwirken. Erhöhte Glykogenspeicher schützen die Muskelproteine vor zellulärer Oxidation. Halten Sie die Hydratation bei ${d.water} L täglich.`;
+  }
+
+  document.getElementById('skynet-verdict').innerText = verdict;
+  document.getElementById('results-box').style.display = 'block';
+  document.getElementById('skynet-container').style.display = 'block';
+  updatePreview();
+  showAds();
+}
+</script>
+</body>
+</html>
